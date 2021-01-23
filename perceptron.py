@@ -1,4 +1,5 @@
 import numpy as np
+from numba import jit
 
 class Percetron(object):
     def __init__(self, train_data, true_labels, d, lr = 1, kernel = 'poly'):
@@ -10,20 +11,29 @@ class Percetron(object):
         self.kernel = kernel
         self.errors = 0
     
+    # @jit(nopython=True)
     def predict(self, input_data):
         if self.kernel == 'poly':
             K = np.power(np.dot(self.train_data, input_data), self.d)
+            # K = self.poly_kernel(self.train_data,input_data,self.d)
             res = np.dot(self.w, K.T)
-            res = np.sign(res)
+            # res = np.sign(res)
         return res
-    
+
+    # @jit(nopython=True)
     def train(self, input_data, true_labels):
         self.errors = 0
         arraysize = len(input_data)
         for i in range(0,arraysize):
             cur_predict = self.predict(input_data[i])
+            cur_predict = np.sign(cur_predict)
             if cur_predict != true_labels[i]:
                 self.errors = self.errors + 1
                 self.w[i] = self.w[i] + true_labels[i]
         
         return self.errors
+
+    
+    def poly_kernel(self,x,y,d):
+        K = np.power(np.dot(x, y), d)
+        return K
