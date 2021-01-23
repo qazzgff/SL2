@@ -78,38 +78,53 @@ def one_vs_all(train_x,train_y,d,test_x,test_y):
 
 
 
+def q1_1():
+    trainerror_mean = np.zeros(7)
+    trainerror_std = np.zeros(7)        
+    testerror_mean = np.zeros(7)
+    testerror_std = np.zeros(7)
+    num_runs = 20  
+    data = load_data()
+            
+    for d in range(1,8):    
+        train_errors = np.zeros(num_runs)
+        test_errors = np.zeros(num_runs)
 
+        for run in range(0,num_runs):
+            print('run: '+ str(run))
+            # data = load_data()
+            train_data,test_data = split(data, 0.2)
+            train_x,train_y = get_label(train_data)
+            test_x,test_y = get_label(test_data)
 
-trainerror_mean = np.zeros(7)
-trainerror_std = np.zeros(7)        
-testerror_mean = np.zeros(7)
-testerror_std = np.zeros(7)
-num_runs = 20  
-
+            train_errors[run],test_errors[run] = one_vs_all(train_x,train_y,d,test_x,test_y)
         
-for d in range(1,8):    
-    train_errors = np.zeros(num_runs)
-    test_errors = np.zeros(num_runs)
+        trainerror_mean[d-1] = train_errors.mean()
+        trainerror_std[d-1] = train_errors.std()
+        testerror_mean[d-1] = test_errors.mean()
+        testerror_std[d-1] = test_errors.std()
 
+    for i in range(len(trainerror_mean)):
+        print('d='+str(i+1)+' mean train error: '+str(trainerror_mean[i])+' ± '+str(trainerror_std[i]))
+        print('d='+str(i+1)+' mean test error: '+str(testerror_mean[i])+' ± '+str(testerror_std[i]))
+
+def q1_2():
+    num_runs = 20
+    data = load_data()
+    
     for run in range(0,num_runs):
         print('run: '+ str(run))
-        data = load_data()
         train_data,test_data = split(data, 0.2)
         train_x,train_y = get_label(train_data)
         test_x,test_y = get_label(test_data)
 
-        train_errors[run],test_errors[run] = one_vs_all(train_x,train_y,d,test_x,test_y)
-    
-    trainerror_mean[d-1] = train_errors.mean()
-    trainerror_std[d-1] = train_errors.std()
-    testerror_mean[d-1] = test_errors.mean()
-    testerror_std[d-1] = test_errors.std()
-
-for i in range(len(trainerror_mean)):
-    print('d='+str(i+1)+' mean train error: '+str(trainerror_mean[i])+' ± '+str(trainerror_std[i]))
-    print('d='+str(i+1)+' mean test error: '+str(testerror_mean[i])+' ± '+str(testerror_std[i]))
 
 
+
+
+if __name__ == '__main__':
+    q1_1()
+    # q1_2()
 
 
 
