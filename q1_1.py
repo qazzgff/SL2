@@ -249,9 +249,7 @@ def one_vs_all_2(train_x,train_y,d,test_x,test_y):
     return test_error
 
 def one_vs_all_confusion(train_x,train_y,d,test_x,test_y):
-    # calss_num = 10
     epoch = 5
-    # errors = np.zeros(epoch)
     Percetron_list = []
 
     confusion_mat = np.zeros(shape=(10,10))
@@ -280,6 +278,53 @@ def one_vs_all_confusion(train_x,train_y,d,test_x,test_y):
         for j in range(0,10):
             confidence[j] = Percetron_list[j].predict(test_x[i])
         predict_label = confidence.index(max(confidence))
+
+        if predict_label != test_y[i]:
+            confusion_mat[int(test_y[i])][int(predict_label)] += 1 
+    
+
+    return confusion_mat
+
+def one_vs_all_conf(train_x,train_y,d,test_x,test_y,k):
+    epoch = 5
+    Percetron_list = []
+
+    confusion_mat = np.zeros(shape=(10,10))
+    # training
+    for classes in range(0,10):
+        # data preprocessing
+        y_cur = train_y * 1
+        for i in range(len(y_cur)):
+            if y_cur[i] != classes:
+                y_cur[i] = -1
+            else:
+                y_cur[i] = 1
+        
+        percetron = Percetron(train_x,y_cur,d,k)
+        
+        print('class: '+ str(classes) +' d= '+ str(d) )
+        percetron.train(train_x,y_cur,epoch)
+        Percetron_list.append(percetron)
+
+    
+    # produce confusion matrix
+    # for i in range(len(test_y)):
+    #     confidence = np.zeros(10)
+    #     confidence = confidence.tolist()
+    #     for j in range(0,10):
+    #         confidence[j] = Percetron_list[j].predict(test_x[i])
+    #     predict_label = confidence.index(max(confidence))
+    
+    confidence = np.zeros(10)
+    confidence = confidence.tolist()
+    for j in range(0,10):
+        confidence[j] = Percetron_list[j].predict(test_x)
+    
+    confidence = np.array(confidence).T
+    confidence = confidence.tolist()
+    for i in range(len(test_y)):
+        c = confidence[i]
+        predict_label = c.index(max(c))
 
         if predict_label != test_y[i]:
             confusion_mat[int(test_y[i])][int(predict_label)] += 1 
@@ -366,7 +411,7 @@ def q1_2():
 
 
 def q1_3():
-    num_runs = 20
+    num_runs = 1
     data = load_data()
     best_d_list = np.zeros(num_runs)
     confusion_matrix = np.zeros(shape=(10,10))
@@ -396,7 +441,7 @@ def q1_3():
                 cv_train = merge_list(traindata_list,fold)
                 cv_train_x,cv_train_y = get_label(cv_train)
 
-                test_errors[fold] = one_vs_all_2(cv_train_x,cv_train_y,d,cv_test_x,cv_test_y)
+                test_errors[fold] = one_vs_all_m2(cv_train_x,cv_train_y,d,cv_test_x,cv_test_y,k='poly')
             
             test_errors_list[d-1] = test_errors.mean()
         
@@ -406,9 +451,10 @@ def q1_3():
         best_d_list[run] = best_d
         
         # calculating the confusion error
+        
 
         trainx,trainy = get_label(train_data)
-        tmp = one_vs_all_confusion(trainx,trainy,best_d_list[run],test_x,test_y)
+        tmp = one_vs_all_conf(trainx,trainy,best_d_list[run],test_x,test_y,k='poly')
         confusion_matrix += tmp
         confusion_matrix_list[run] = tmp
     
@@ -534,8 +580,8 @@ def q1_5_2():
 
 if __name__ == '__main__':
     # q1_1()
-    q1_2()
-    # q1_3()
+    # q1_2()
+    q1_3()
     # q1_5()
     # q1_5_2()
 
