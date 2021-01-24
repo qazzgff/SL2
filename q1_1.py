@@ -103,6 +103,54 @@ def one_vs_all_m(train_x,train_y,d,test_x,test_y,k):
     print('d= '+str(d)+' train error: '+str(train_error)+' test error: '+str(test_error))
     return train_error,test_error
 
+def one_vs_all_m2(train_x,train_y,d,test_x,test_y,k):
+    # calss_num = 10
+    epoch = 5
+    # errors = np.zeros(epoch)
+    Percetron_list = []
+    
+    # training
+    for classes in range(0,10):
+        # data preprocessing
+        y_cur = train_y * 1
+        for i in range(len(y_cur)):
+            if y_cur[i] != classes:
+                y_cur[i] = -1
+            else:
+                y_cur[i] = 1
+        
+        # percetron = Percetron(train_x,y_cur,d)
+        percetron = Percetron(train_x,y_cur,d,kernel=k)
+        # for ep in range(1,epoch+1):
+        #     print('class: '+ str(classes) + ' epoch: '+ str(ep)+' d= '+ str(d) )
+            # percetron.train(train_x,y_cur)
+        print('calss: '+str(classes))
+        percetron.train(train_x,y_cur,epoch)
+        
+            
+        
+        Percetron_list.append(percetron)
+
+    
+    # test error
+    test_error = 0
+    confidence = np.zeros(10)
+    confidence = confidence.tolist()
+    for j in range(0,10):
+        confidence[j] = Percetron_list[j].predict(test_x)
+    
+    confidence = np.array(confidence).T
+    confidence = confidence.tolist()
+    for i in range(len(test_y)):
+        c = confidence[i]
+        predict_label = c.index(max(c))
+        if predict_label != test_y[i]:
+            test_error = test_error + 1
+    
+    test_error = test_error/(len(test_y))
+    print('d= '+str(d)+' test error: '+str(test_error))
+    return test_error
+
 def one_vs_all(train_x,train_y,d,test_x,test_y):
     # calss_num = 10
     epoch = 5
@@ -423,7 +471,50 @@ def q1_5():
 
 
 def q1_5_2():
+    num_runs = 20
+    data = load_data()
+    best_c_list = np.zeros(num_runs)
+    test_error = np.zeros(num_runs)
+    
+    S = np.array([0.001,0.003,0.005,0.008,0.01,0.02,0.03])
+    for run in range(0,num_runs):
+        train_data,test_data = split(data, 0.2)
+        test_x,test_y = get_label(test_data)
+        test_errors_list = np.zeros(7)
+        for d in range(1,8):
+            c = S[d-1]
+            print('run: '+ str(run)+' c= '+str(c))
+            # split training data into 5 folds
+            traindata_list = []
+            length = len(train_data)
+            n = 5
+            for i in range(n):
+                one_list = train_data[math.floor(i / n * length):math.floor((i + 1) / n * length)]
+                traindata_list.append(one_list)
+            
+            test_errors = np.zeros(5)
+            for fold in range(0,5):
+                print('fold: '+ str(fold))
+                cv_test_x,cv_test_y = get_label(traindata_list[fold])
+                cv_train = merge_list(traindata_list,fold)
+                cv_train_x,cv_train_y = get_label(cv_train)
 
+                test_errors[fold] = one_vs_all_m2(cv_train_x,cv_train_y,c,cv_test_x,cv_test_y,k='gaul')
+            
+            test_errors_list[d-1] = test_errors.mean()
+        
+        # best c
+        test_errors_list = test_errors_list.tolist()
+        best_c = S[int(test_errors_list.index(min(test_errors_list)))]
+        best_c_list[run] = best_c
+
+        # test error
+        trainx,trainy = get_label(train_data)
+        testserror = one_vs_all_m2(trainx,trainy,best_c,test_x,test_y,k='gaul')
+        test_error[run] = testserror
+    
+    print('test error: '+str(test_error.mean())+' ± '+str(test_error.std()))
+    print('best c: '+ str(best_c_list.mean())+' ± '+ str(best_c_list.std()))
 
     
 
@@ -447,7 +538,8 @@ if __name__ == '__main__':
     # q1_1()
     # q1_2()
     # q1_3()
-    q1_5()
+    # q1_5()
+    q1_5_2()
 
 
 
