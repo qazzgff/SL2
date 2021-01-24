@@ -21,4 +21,5 @@ import math
 # a = a*2
 # print(a)
 
+        # best_d_list = np.array([5,5,5,5,5,4,5,5,5,5,7,6,6,6,6,6,6,5,5,6])
 

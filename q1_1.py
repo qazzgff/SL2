@@ -55,7 +55,8 @@ def one_vs_all(train_x,train_y,d,test_x,test_y):
             else:
                 y_cur[i] = 1
         
-        percetron = Percetron(train_x,y_cur,d)
+        # percetron = Percetron(train_x,y_cur,d)
+        percetron = Percetron(train_x,y_cur,d,kernel='gaul')
         for ep in range(1,epoch+1):
             print('class: '+ str(classes) + ' epoch: '+ str(ep)+' d= '+ str(d) )
             percetron.train(train_x,y_cur)
@@ -89,7 +90,8 @@ def one_vs_all(train_x,train_y,d,test_x,test_y):
     
     print('d= '+str(d)+' train error: '+str(train_error)+' test error: '+str(test_error))
 
-
+    train_error = train_error/(len(train_y))
+    test_error = test_error/(len(test_y))
     return train_error,test_error
 
 def one_vs_all_2(train_x,train_y,d,test_x,test_y):
@@ -264,7 +266,7 @@ def q1_3():
         train_data,test_data = split(data, 0.2)
         test_x,test_y = get_label(test_data)
         test_errors_list = np.zeros(7)
-        '''
+        
         for d in range(1,8):
             print('run: '+ str(run)+' d= '+str(d))
             # split training data into 5 folds
@@ -290,10 +292,9 @@ def q1_3():
         test_errors_list = test_errors_list.tolist()
         best_d = test_errors_list.index(min(test_errors_list)) + 1
         best_d_list[run] = best_d
-        '''
+        
         # calculating the confusion error
 
-        best_d_list = np.array([5,5,5,5,5,4,5,5,5,5,7,6,6,6,6,6,6,5,5,6])
         trainx,trainy = get_label(train_data)
         tmp = one_vs_all_confusion(trainx,trainy,best_d_list[run],test_x,test_y)
         confusion_matrix += tmp
@@ -319,7 +320,41 @@ def q1_3():
 
         
 
+def q1_5():
+    trainerror_mean = np.zeros(7)
+    trainerror_std = np.zeros(7)        
+    testerror_mean = np.zeros(7)
+    testerror_std = np.zeros(7)
+    num_runs = 1  
+    data = load_data()
+    data = data[:1000]
     
+    S = np.array([0.001,0.002,0.003,0.005,0.008,0.01,0.02])
+    for d in range(1,8):    
+        train_errors = np.zeros(num_runs)
+        test_errors = np.zeros(num_runs)
+        c = S[d-1]
+
+        
+        for run in range(0,num_runs):
+            print('run: '+ str(run))
+            # data = load_data()
+            train_data,test_data = split(data, 0.2)
+            train_x,train_y = get_label(train_data)
+            test_x,test_y = get_label(test_data)
+
+            train_errors[run],test_errors[run] = one_vs_all(train_x,train_y,c,test_x,test_y)
+        
+        trainerror_mean[d-1] = train_errors.mean()
+        trainerror_std[d-1] = train_errors.std()
+        testerror_mean[d-1] = test_errors.mean()
+        testerror_std[d-1] = test_errors.std()
+    
+    
+
+    for i in range(len(trainerror_mean)):
+        print('d='+str(i+1)+' mean train error: '+str(trainerror_mean[i])+' ± '+str(trainerror_std[i]))
+        print('d='+str(i+1)+' mean test error: '+str(testerror_mean[i])+' ± '+str(testerror_std[i]))
     
 
 
@@ -341,7 +376,8 @@ def q1_3():
 if __name__ == '__main__':
     # q1_1()
     # q1_2()
-    q1_3()
+    # q1_3()
+    q1_5()
 
 
 

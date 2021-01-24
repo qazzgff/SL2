@@ -40,7 +40,3 @@ class Percetron(object):
         
         return self.errors
 
-    
-    def poly_kernel(self,x,y,d):
-        K = (x@y.T)**d
-        return K
