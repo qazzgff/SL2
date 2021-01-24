@@ -346,7 +346,7 @@ def q1_2():
                 cv_train = merge_list(traindata_list,fold)
                 cv_train_x,cv_train_y = get_label(cv_train)
 
-                test_errors[fold] = one_vs_all_2(cv_train_x,cv_train_y,d,cv_test_x,cv_test_y)
+                test_errors[fold] = one_vs_all_m2(cv_train_x,cv_train_y,d,cv_test_x,cv_test_y,k='poly')
             
             test_errors_list[d-1] = test_errors.mean()
         
@@ -357,7 +357,7 @@ def q1_2():
 
         # test error
         trainx,trainy = get_label(train_data)
-        testserror = one_vs_all_2(trainx,trainy,best_d,test_x,test_y)
+        testserror = one_vs_all_m2(trainx,trainy,best_d,test_x,test_y,k='poly')
         test_error[run] = testserror
     
     print('test error: '+str(test_error.mean())+' ± '+str(test_error.std()))
@@ -516,8 +516,6 @@ def q1_5_2():
     print('test error: '+str(test_error.mean())+' ± '+str(test_error.std()))
     print('best c: '+ str(best_c_list.mean())+' ± '+ str(best_c_list.std()))
 
-    
-
 
 
 
@@ -536,10 +534,10 @@ def q1_5_2():
 
 if __name__ == '__main__':
     # q1_1()
-    # q1_2()
+    q1_2()
     # q1_3()
     # q1_5()
-    q1_5_2()
+    # q1_5_2()
 
 
 
